@@ -1,0 +1,349 @@
+<html lang="en-GB">
+<head>
+    <meta name="robots" content="noindex">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kaleido: Scaling Sequence-to-Sequence Generative Neural Rendering</title>
+    <meta name="description" content="We've presented Kaleido, a general-purpose, generative neural rendering engine.">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    <meta name="robots" content="all">
+    <meta content="en_EN" property="og:locale">
+    <meta content="website" property="og:type">
+    <meta content="Kaleido: Scaling Sequence-to-Sequence Generative Neural Rendering" property="og:title">
+    <meta content="Kaleido: Scaling Sequence-to-Sequence Generative Neural Rendering" property="og:description">
+    <link rel="stylesheet" type="text/css" media="all" href="assets/stylesheets/main.css" />
+    <link rel="stylesheet" type="text/css" media="all" href="kaleido/clarity.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/foundation.min.css">
+    <link href="assets/fontawesome-pro-6.6.0-web/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/img-comparison-slider@8/dist/styles.css"/>
+    <script defer src="https://cdn.jsdelivr.net/npm/img-comparison-slider@8/dist/index.js"></script>
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({
+            "HTML-CSS": {
+              scale: 95,
+              fonts: ["Gyre-Pagella"],
+              imageFont: null,
+              undefinedFamily: "'Arial Unicode MS', cmbright"
+            },
+            tex2jax: {
+                inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+                processEscapes: true
+              }
+          });
+    </script>
+    <script type="text/javascript"
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+    </script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!-- Add P5JS -->
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.11.10/lib/p5.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.11.10/lib/addons/p5.sound.min.js"></script>
+    <!-- Add 3D Model Viewer -->
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
+</head>
+
+<body>
+    <!-- Title Page -->
+    <!-- Dark Theme Example -->
+    <div class="container blog" id="first-content" style="background:
+            radial-gradient(circle at 50% 50%, #9BD4E5 0%, #5FA9D4 80%),
+            linear-gradient(120deg, #A8D5A2 0%, #D6EAC7 50%, transparent 100%),
+            linear-gradient(200deg, #F8C7D8 15%, #E1C4F4 40%, transparent 80%),
+            linear-gradient(45deg, #FFF4D6 0%, #FCEABB 30%, transparent 70%);
+        background-blend-mode: overlay, lighten, screen, normal;">
+        <div class="blog-title no-cover">
+            <div class="blog-intro">
+                <div>
+                    <h1 class="title">Kaleido: Scaling Sequence-to-Sequence Generative Neural Rendering <br>[Supplementary Material]</h1>
+                    <p class="author">
+                        Anonymous Authors
+                    </p>
+                    <p class="abstract">
+                        We introduce Kaleido, a family of spatial generative models that achieves photorealistic, unified object- and scene-level neural rendering. Kaleido sets a new state-of-the-art, significantly outperforming existing generative models in few-view settings, and is the first zero-shot generative model to match the rendering quality of per-scene optimisation models in many-view settings.
+                </div>
+                <div class="info">
+                    <p>ICLR 2026 (Under Review)</p>
+                </div>
+            </div>
+            <!-- <div class="blog-cover" id="blog-cover">
+                <script src="assets/scripts/kaleido_cover.js"></script>
+            </div> -->
+        </div>
+    </div>
+
+
+    <div class="container blog main first" id="blog-main">
+        <h1 >
+            Introduction
+        </h1>
+        <p class='text'>
+            Kaleido is a general-purpose, generative neural rendering engine that can synthesise photorealistic images and videos of any scene or object from any viewpoint.
+            Unlike traditional methods that require per-scene optimisation or are limited to specific object categories, Kaleido leverages a sequence-to-sequence transformer architecture design to learn a unified understanding of 3D space from diverse video and 3D datasets. This allows Kaleido to render new subjects in a zero-shot manner, generating realistic renderings of both individual objects and complex environments without any scene-specific fine-tuning.
+        </p>
+
+        <p class="text">
+            Kaleido's design is guided by a simple philosophy: <b>3D perception is a form of visual common sense</b>. Instead of relying on explicit 3D structures and inductive biases, we consider 3D as a specialised form of video and unify both 3D and video modelling with a consistent sequence-to-sequence design. This means Kaleido learns its understanding of space, geometry, and physics directly from watching millions of videos, just like a human learns by observing the world. This foundational visual understanding learned from large-scale video data is then efficiently transferred and refined using structured, camera-labelled 3D datasets. This two-stage process is designed all within a single, unified model, without any task-specific components, making Kaleido incredibly versatile, efficient, and easy to scale.
+        </p>
+    </div>
+
+    <div class="container blog main">
+        <h1>Kaleido Generations</h1>
+        <p class="text">
+            Kaleido is able to generate stunningly realistic renderings that capture from fine-grained material details to complex, global lighting effects.
+        </p>
+
+        <h2>Single-View Generative Renderings</h2>
+        <p class="text">
+            A primary application of Kaleido is to perform generative rendering from a single image. Our process is simple: given one input image, Kaleido first generates 32 to 48 distinct novel views along a pre-defined camera path. Then, our lightweight view interpolation model <a href="https://film-net.github.io/">FiLM</a> seamlessly stitches these keyframes together by predicting all the intermediate frames, creating a smooth, continuous video. The following examples, rendered at 30 FPS, showcase Kaleido's ability to produce high-quality, spatially consistent 4-to-6-second videos from a single image across a wide range of real-world and synthetic subjects.
+        </p>
+    </div>
+
+    <div class="container blog extra-extra-large gray">
+        <div id="media-source" style="display: none">
+            <video autoplay loop muted playsinline>
+                <source src="kaleido/videos/monet.webm" type="video/webm">
+            </video>
+            <video autoplay loop muted playsinline>
+                <source src="kaleido/videos/hajime.webm" type="video/webm">
+            </video>
+            <video autoplay loop muted playsinline>
+                <source src="kaleido/videos/santa.webm" type="video/webm">
+            </video>
+            <video autoplay loop muted playsinline>
+                <source src="kaleido/videos/golden2.webm" type="video/webm">
+            </video>
+            <video autoplay loop muted playsinline>
+                <source src="kaleido/videos/dali5.webm" type="video/webm">
+            </video>
+            <video autoplay loop muted playsinline>
+                <source src="kaleido/videos/cheval1.webm" type="video/webm">
+            </video>
+            <video autoplay loop muted playsinline>
+                <source src="kaleido/videos/magritte.webm" type="video/webm">
+            </video>
+            <video autoplay loop muted playsinline>
+                <source src="kaleido/videos/camera.webm" type="video/webm">
+            </video>
+            <video autoplay loop muted playsinline>
+                <source src="kaleido/videos/zelda.webm" type="video/webm">
+            </video>
+            <video autoplay loop muted playsinline>
+                <source src="kaleido/videos/city2.webm" type="video/webm">
+            </video>
+            <video autoplay loop muted playsinline>
+                <source src="kaleido/videos/orange.webm" type="video/webm">
+            </video>
+            <video autoplay loop muted playsinline>
+                <source src="kaleido/videos/eye.webm" type="video/webm">
+            </video>
+            <video autoplay loop muted playsinline>
+                <source src="kaleido/videos/toy.webm" type="video/webm">
+            </video>
+            <video autoplay loop muted playsinline>
+                <source src="kaleido/videos/street1.webm" type="video/webm">
+            </video>
+            <video autoplay loop muted playsinline>
+                <source src="kaleido/videos/rover.webm" type="video/webm">
+            </video>
+            <video autoplay loop muted playsinline>
+                <source src="kaleido/videos/forest.webm" type="video/webm">
+            </video>
+        </div>
+        <div id="video-gallery"></div>
+    </div>
+
+    <div class="container blog main">
+        <h2>Multi-View Generative Renderings</h2>
+        <p class="text"> ABC </p>
+    </div>
+
+    <div class="container blog main gray">
+        <div class="slide-menu">
+            <ul class="dots" id="slide-menu">
+                <li class="dot active"></li>
+                <li class="dot"></li>
+                <li class="dot"></li>
+            </ul>
+        </div>
+        <div class="slide-content", style="display: block;">
+            <p class="caption inline">
+                Input Reference Images
+            </p>
+            <div class="columns-8">
+                <img src="kaleido/videos/monet.jpg">
+                <img src="kaleido/videos/monet.jpg">
+                <img src="kaleido/videos/monet.jpg">
+                <img src="kaleido/videos/monet.jpg">
+            </div>
+            <p class="caption inline">
+                Kaleido Output
+            </p>
+            <video autoplay loop muted playsinline>
+                <source src="kaleido/videos/forest.webm" type="video/webm">
+            </video>   
+        </div>
+        <div class="slide-content", style="display: none;">
+            <img src="kaleido/videos/cheval1.jpg">
+            <p class="caption">
+                Nulla quis porttitor varius phasellus dolor curae primis. Suscipit sit adipiscing nibh justo hac. Turpis massa ridiculus sit, finibus quis litora sagittis torquent. Dignissim suscipit quam curabitur sit velit, rhoncus tincidunt purus? At netus efficitur penatibus purus amet urna etiam. Leo neque ligula varius lacinia torquent vehicula. Tempus non mauris vel placerat natoque.
+            </p>
+        </div>
+        <div class="slide-content", style="display: none;">
+            <img src="kaleido/videos/dali.jpg">
+            <p class="caption">
+                Nulla quis porttitor varius phasellus dolor curae primis. Suscipit sit adipiscing nibh justo hac. Turpis massa ridiculus sit, finibus quis litora sagittis torquent. Dignissim suscipit quam curabitur sit velit, rhoncus tincidunt purus? At netus efficitur penatibus purus amet urna etiam. Leo neque ligula varius lacinia torquent vehicula. Tempus non mauris vel placerat natoque.
+            </p>
+        </div>
+    </div>
+
+    <div class="container blog main">
+        <h2>3D Reconstruction</h2>
+        <p class="text">
+            We showcase Kaleido's precise multi-view rendering by using its generated views for 3D reconstruction with an off-the-shelf surface reconstruction framework <a href="https://vcai.mpi-inf.mpg.de/projects/NeuS2/">NeuS2</a>. Below, we compare reconstructions from views generated by Kaleido against those from <a href="https://kxhit.github.io/EscherNet">EscherNet</a>. The results show that Kaleido's generated views lead to significantly higher-quality meshes. Notably, at 1024px resolution, Kaleido's reconstructions is nearly close to the ground-truth, capturing fine geometric details and producing sharp, realistic textures.
+        </p>
+    </div>
+
+
+    <div class="container blog extra-large gray">
+        <div class="gso30_3d">
+            <div class="one-class">
+                <p class="caption inline center">EscherNet [256 Res.]</p>
+                <model-viewer orientation="0deg -90deg 0deg" src="kaleido/gso3d/glbs/eschernet_2_compressed/alarm.glb" auto-rotate camera-controls
+                shadow-intensity="1" exposure="3"  id="eschernet-3d"></model-viewer>
+            </div>
+            <div class="one-class">
+                <p class="caption inline center">Kaleido [256 Res.]</p>
+                <model-viewer orientation="0deg -90deg 0deg" src="kaleido/gso3d/glbs/kaleido_2_compressed/alarm.glb" auto-rotate camera-controls shadow-intensity="1" exposure="2.5"  id="kaleido-3d"></model-viewer>
+            </div>
+            <div class="one-class">
+                <p class="caption inline center">Kaleido [1024 Res.]</p>
+                <model-viewer orientation="0deg -90deg 0deg" src="kaleido/gso3d/glbs/kaleido_1024_2_compressed/alarm.glb"  auto-rotate camera-controls  shadow-intensity="1" exposure="2.5" id="kaleido1024-3d"></model-viewer>
+            </div>
+            <div class="one-class">
+                <p class="caption inline center">Ground-Truth</p>
+                <model-viewer orientation="0deg -90deg 0deg" src="kaleido/gso3d/glbs/gt_compressed/alarm.glb" auto-rotate camera-controls  shadow-intensity="1" exposure="1.2"  id="gt-3d"></model-viewer>
+            </div>
+        </div>
+
+        <div class="video-caption">
+            <p class="caption inline" style="font-style: normal;">
+                <b>GSO-30 Dataset /  </b>
+                <select id="3d-selector1" class="adaptive-selector select-container"  data-temp-id="3d-container-temp1">
+                    <option value="Alarm" selected>Alarm</option>
+                    <option value="Backpack">Backpack</option>
+                    <option value="Bell">Bell</option>
+                    <option value="Blocks">Blocks</option>
+                    <option value="Chicken">Chicken</option>
+                    <option value="Cream">Cream</option>
+                    <option value="Elephant">Elephant</option>
+                    <option value="Grandfather">Grandfather</option>
+                    <option value="Grandmother">Grandmother</option>
+                    <option value="Hat">Hat</option>
+                    <option value="Leather">Leather</option>
+                    <option value="Lion">Lion</option>
+                    <option value="Lunch_Bag">Lunch Bag</option>
+                    <option value="Mario">Mario</option>
+                    <option value="Oil">Oil</option>
+                    <option value="School_Bus1">School Bus 1</option>
+                    <option value="School_Bus2">School Bus 2</option>
+                    <option value="Shoe">Shoe</option>
+                    <option value="Shoe1">Shoe 1</option>
+                    <option value="Shoe2">Shoe 2</option>
+                    <option value="Shoe3">Shoe 3</option>
+                    <option value="Soap">Soap</option>
+                    <option value="Sofa">Sofa</option>
+                    <option value="Sorter">Sorter</option>
+                    <option value="Sorting_Board">Sorting Board</option>
+                    <option value="Stucking_Cups">Stucking Cups</option>
+                    <option value="Teapot">Teapot</option>
+                    <option value="Toaster">Toaster</option>
+                    <option value="Train">Train</option>
+                    <option value="Turtle">Turtle</option>
+                </select>
+                <b>conditioned on </b>
+                <select id="3d-selector2" class="adaptive-selector select-container" data-temp-id="3d-container-temp2">
+                    <option value="1">1 view</option>
+                    <option value="2" selected>2 views</option>
+                    <option value="3">3 views</option>
+                    <option value="5">5 views</option>
+                    <option value="10">10 views</option>
+                </select>
+                <!-- Hidden temporary containers for width measurement -->
+                <div id="3d-container-temp1" class="temp-container"><p></p></div>
+                <div id="3d-container-temp2" class="temp-container"><p></p></div>
+            </p>
+        </div>
+    </div>
+
+    <div class="container blog main">
+        <h2>Emergent Rendering Capabilities</h2>
+        <p class="text">
+            Kaleido's sequence-to-sequence design and its powerful data-driven prior give rise to several emergent capabilities not found in prior generative rendering models. To demonstrate this, we test Kaleido on unconventional inputs that are clearly out-of-distribution from our training data, such as image collages and colour padded images.
+        </p>
+        <p class="text">
+            As shown below, Kaleido is able to correctly interpret the 3D structure and appearance of these unusual inputs, generating novel views that are spatially coherent and perceptionally plausible. This strong generalisation highlights that Kaleido has learned a robust understanding of 3D space, akin to a form of "visual common sense."
+        </p>
+    </div>
+
+    <div class="container blog extra-large gray">
+        <div class="columns-4">
+              <video autoplay loop muted playsinline>
+                <source src="kaleido/videos/emergent/collage3.webm" type="video/webm">
+            </video>
+              <video autoplay loop muted playsinline>
+                <source src="kaleido/videos/emergent/collage7.webm" type="video/webm">
+            </video>
+              <video autoplay loop muted playsinline>
+                <source src="kaleido/videos/emergent/padding2.webm" type="video/webm">
+            </video>
+              <video autoplay loop muted playsinline>
+                <source src="kaleido/videos/emergent/padding5.webm" type="video/webm">
+            </video>
+        </div>
+    </div>
+
+    <div class="container blog main">
+        <h1>Conclusions, Limitations and Future Work</h1>
+        <p class="text">
+            In this project, we introduced Kaleido, a new family of generative models that redefines neural rendering as a pure sequence-to-sequence problem, unifying 3D and video modelling. Through extensive ablations, we progressively modernised the architecture and training strategies, resulting in a model with exceptional rendering precision and spatial consistency. Kaleido exhibits strong scaling properties and achieves state-of-the-art performance across a wide range of view synthesis and 3D reconstruction benchmarks. Most notably, it is the first generative rendering model to match the quality of per-scene optimisation methods in a zero-shot setting, representing a significant step towards a universal, general-purpose rendering engine. Despite its strong performance, Kaleido has several limitations that open exciting avenues for future research:    
+        <ul>
+            <li>
+                <p class="text">
+                <b>Fixed Camera Intrinsics.</b> Kaleido currently does not model camera intrinsics, which prevents it from generating effects like dolly-zooms, a capability present in models like <a href="https://stable-virtual-camera.github.io/">SEVA</a>. Future work could explore incorporating intrinsic parameterisation, potentially another form of <a href="https://www.liruilong.cn/prope/">RoPE-based positional encoding designs</a>, to allow for more flexible camera control.
+                </p>
+            </li>
+            <li>
+                <p class="text">
+                <b>Degraded Generations with Large Viewpoint Changes.</b> While Kaleido maintains excellent spatial consistency, its generated views can sometimes lack semantic plausibility when the viewpoint change is extreme. This suggests that while video pre-training builds a strong geometric foundation, it may not provide the diverse semantic knowledge required for high-fidelity single-image realism. Integrating priors from large-scale text-to-image/video models could be a promising direction to address this limitation.
+                </p>
+            </li>
+            <li>
+                <p class="text">
+                <b>Towards Faster Rendering.</b> Kaleido's generation time scales with the number of input views, and it is far from real-time. To fully bridge the gap with efficient scene-specific methods like 3D Gaussian Splatting, future work will focus on improving inference speed through techniques like step distillation or architectural optimisations.
+                </p>
+            </li>
+            <li>
+                <p class="text">
+                <b>Towards 4D Generation.</b> Our unified positional encoding for space and time provides a natural foundation for true 4D generation. A promising future direction is to extend Kaleido to precisely control scenes across both space and time, enabling generative modelling of dynamic, four-dimensional worlds.
+                </p>
+            </li>
+        </ul>
+        </p>
+    </div>
+
+    <!-- Footer Page -->
+    <footer>
+        <div class="container">
+            <p>
+                Powered by Kaleido Team.
+            </p>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <script src="kaleido/clarity.js"></script>
+    <script src="assets/scripts/main.js"></script>
+    </html>
+</body>
