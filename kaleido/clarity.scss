@@ -89,6 +89,12 @@ div.gso30_3d {
         grid-template-columns: repeat(3, 1fr);
     }
 
+    .columns-4 {
+        display: grid;
+        column-gap: 2vw;
+        grid-template-columns: repeat(2, 1fr);
+    }
+
     .columns-6-3d {
         grid-template-columns: 1.3fr 1.3fr 1fr;
     }
