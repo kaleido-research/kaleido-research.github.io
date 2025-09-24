@@ -154,6 +154,124 @@
     </div>
 
     <div class="container blog main">
+        <h2>Multi-View Generative Renderings</h2>
+        <p class="text"> 
+            Kaleido's generative rendering quality scales impressively as more reference views are provided. Below, we compare Kaleido against several state-of-the-art rendering methods on the widely-used NeRF Synthetic dataset, in 256px resolution, and without using frame interpolation. Kaleido produces significantly higher-quality renderings with much less flickering than other generative models like <a href="https://kxhit.github.io/EscherNet">EscherNet</a>. In many-view settings, its quality matches that of per-scene optimisation methods like <a href="https://nvlabs.github.io/instant-ngp/">Instant-NGP</a>, achieving the accuracy of a specialised scene-specific model within a single, general-purpose rendering framework.
+        </p>
+    </div>
+
+    <div class="container blog extra-extra-large gray-linear">
+        <div class="video-control">
+            <a class="button"onclick="SlowVideo('nerf-nvs')"><i class="fa-solid fa-backward"></i></a>
+            <a class="button"onclick="ToggleVideo('nerf-nvs')"><i class="fa-solid fa-play-pause"></i></a>
+            <a class="button"onclick="FastVideo('nerf-nvs')"><i class="fa-solid fa-forward"></i></a>
+            <a class="button"onclick="RestartVideo('nerf-nvs')"><i class="fa-solid fa-rotate-left"></i></a>
+        </div>
+        <div class="columns-5">
+            <div class="one-class">
+                <p class="caption inline center">Instant-NGP</p>
+                <video loop muted autoplay id="insngp-nerf" class="nerf-nvs-video" src="kaleido/videos/multiview/nerf_synthetic/ingp/5_view/chair.mp4">
+                </video>
+            </div>
+            <div class="one-class">
+                <p class="caption inline center">3D Gaussian Splatting</p>
+                <video loop muted autoplay id="3dgs-nerf" class="nerf-nvs-video" src="kaleido/videos/multiview/nerf_synthetic/3dgs/5_view/chair.mp4">
+                </video>
+            </div>
+            <div class="one-class">
+                <p class="caption inline center">EscherNet</p>
+                <video loop muted autoplay id="eschernet-nerf" class="nerf-nvs-video" src="kaleido/videos/multiview/nerf_synthetic/eschernet/5_view/chair.mp4">
+                </video>
+            </div>
+            <div class="one-class">
+                <p class="caption inline center">Kaleido</p>
+                <video loop muted autoplay id="kaleido-nerf" class="nerf-nvs-video" src="kaleido/videos/multiview/nerf_synthetic/kaleido/5_view/chair.mp4">
+                </video>
+            </div>
+            <div class="one-class">
+                <p class="caption inline center">Ground-Truth</p>
+                <video loop muted autoplay id="gt-nerf" class="nerf-nvs-video" src="kaleido/videos/multiview/nerf_synthetic/gt/chair.mp4">
+                </video>
+            </div>
+        </div>
+
+        <div class="video-caption">
+            <p class="caption inline" style="font-style: normal;">      
+                <b>NeRF Synthetic Dataset / </b>  
+                <Select id="nerf-selector1" class="adaptive-selector select-container"  data-temp-id="nerf-container-temp1">
+                    <option value="chair" selected>Chair</option>
+                    <option value="drums">Drums</option>
+                    <option value="ficus">Ficus</option>
+                    <option value="hotdog">Hotdog</option>
+                    <option value="lego">Lego</option>
+                    <option value="materials">Materials</option>
+                    <option value="mic">Mic</option>
+                    <option value="ship">Ship</option>
+                </Select>
+               <b>conditioned on </b>
+               <Select id="nerf-selector2" class="adaptive-selector select-container" data-temp-id="nerf-container-temp2">
+                    <option value="1">1 view</option>
+                    <option value="2">2 views</option>
+                    <option value="3">3 views</option>
+                    <option value="5" selected>5 views</option>
+                    <option value="10">10 views</option>
+                    <option value="20">20 views</option>
+                    <option value="50">50 views</option>
+                    <option value="100">100 views</option>
+               </Select>
+                <!-- Hidden temporary containers for width measurement -->
+                <div id="nerf-container-temp1" class="temp-container"><p></p></div>
+                <div id="nerf-container-temp2" class="temp-container"><p></p></div>
+            </p>
+            <p class="video-speed" id="nerf-nvs-msg">
+                Speed: ×1.00
+            </p>
+        </div>
+
+    </div>
+
+    <div class="container blog main">
+        <p class="text">
+            Here, we evaluate Kaleido's performance upper-bound by demonstrating its ability to render a long, 480-frame video of a complex, real-world scene (from the Mip-NeRF 360's "Room" scene), featuring a fast-moving camera trajectory with loop closure.
+        </p>
+        <p class="text">
+            To generate this sequence, Kaleido was conditioned on just 8 widely-spaced reference images. The video was then generated autoregressively for 40 steps, with the model predicting 12 new frames at each step. To ensure long-term global consistency, within each generation step, the model attended to both the original 8 reference frames and the 4 spatially closest previously generated frames.  
+        </p>
+        <p class="text">
+            The resulting video showcases Kaleido's ability to produce high-quality, spatially consistent novel views with minimal flickering, even under these challenging conditions. It successfully captures the scene's complex geometry, materials, and lighting, highlighting its strong generalisation capabilities and its potential for practical applications in virtual reality, telepresence, and 3D content creation.
+        </p>
+    </div>
+
+    <div class="container blog extra-extra-large gray">
+        <div class="columns-2">
+            <div>
+                <p class="caption inline">
+                    Reference Images
+                </p>
+                <div class="columns-4">
+                    <img src="kaleido/videos/multiview/room_input/DSCF4667.JPG">
+                    <img src="kaleido/videos/multiview/room_input/DSCF4698.JPG">
+                    <img src="kaleido/videos/multiview/room_input/DSCF4760.JPG">
+                    <img src="kaleido/videos/multiview/room_input/DSCF4866.JPG">
+                    <img src="kaleido/videos/multiview/room_input/DSCF4876.JPG">
+                    <img src="kaleido/videos/multiview/room_input/DSCF4893.JPG">
+                    <img src="kaleido/videos/multiview/room_input/DSCF4945.JPG">
+                    <img src="kaleido/videos/multiview/room_input/DSCF4824.JPG">
+                </div>
+            </div>
+            <div>
+                <p class="caption inline">
+                    Kaleido Output
+                </p>
+                <video autoplay loop muted playsinline>
+                    <source src="kaleido/videos/multiview/room.mp4" type="video/mp4">
+                </video>   
+            </div>
+        </div>
+    </div>
+
+    
+    <div class="container blog main">
         <h2>3D Reconstruction</h2>
         <p class="text">
             We showcase Kaleido's precise multi-view rendering by using its generated views for 3D reconstruction with an off-the-shelf surface reconstruction framework <a href="https://vcai.mpi-inf.mpg.de/projects/NeuS2/">NeuS2</a>. Below, we compare reconstructions from views generated by Kaleido against those from <a href="https://kxhit.github.io/EscherNet">EscherNet</a>. The results show that Kaleido's generated views lead to significantly higher-quality meshes. Notably, at 1024px resolution, Kaleido's reconstructions is nearly close to the ground-truth, capturing fine geometric details and producing sharp, realistic textures.
@@ -165,7 +283,7 @@
         <div class="gso30_3d">
             <div class="one-class">
                 <p class="caption inline center">EscherNet [256 Res.]</p>
-                <model-viewer orientation="0deg -90deg 0deg" src="kaleido/gso3d/glbs/eschernet_2_compressed/alarm.glb" auto-rotate camera-controls min-camera-orbit="auto 0deg auto" max-camera-orbit="auto 90deg auto" 
+                <model-viewer orientation="0deg -90deg 0deg" src="kaleido/gso3d/glbs/eschernet_2_compressed/alarm.glb" auto-rotate camera-controls min-camera-orbit="auto 0deg auto" max-camera-orbit="auto 90deg auto"
                 shadow-intensity="1" exposure="3"  id="eschernet-3d"></model-viewer>
             </div>
             <div class="one-class">
@@ -178,7 +296,7 @@
             </div>
             <div class="one-class">
                 <p class="caption inline center">Ground-Truth</p>
-                <model-viewer orientation="0deg -90deg 0deg" src="kaleido/gso3d/glbs/gt_compressed/alarm.glb" auto-rotate camera-controls min-camera-orbit="auto 0deg auto" max-camera-orbit="auto 90deg auto" shadow-intensity="1" exposure="1.2"  id="gt-3d"></model-viewer>
+                <model-viewer orientation="0deg -90deg 0deg" src="kaleido/gso3d/glbs/gt_compressed/alarm.glb" auto-rotate camera-controls min-camera-orbit="auto 0deg auto" max-camera-orbit="auto 90deg auto"  shadow-intensity="1" exposure="1.2"  id="gt-3d"></model-viewer>
             </div>
         </div>
 
@@ -238,7 +356,7 @@
             Kaleido's sequence-to-sequence design and its powerful data-driven prior give rise to several emergent capabilities not found in prior generative rendering models. To demonstrate this, we test Kaleido on unconventional inputs that are clearly out-of-distribution from our training data, such as image collages and colour padded images.
         </p>
         <p class="text">
-            As shown below, Kaleido is able to correctly interpret the 3D structure and appearance of these unusual inputs, generating novel views that are spatially coherent and perceptionally plausible. This strong generalisation highlights that Kaleido has learned a robust understanding of 3D space, akin to a form of "visual common sense."
+            As shown below, Kaleido is able to reasonably interpret the 3D structure and appearance of these unusual inputs, generating novel views that are spatially coherent and perceptionally plausible. This strong generalisation highlights that Kaleido has learned a robust understanding of 3D space, as a form of "visual common sense."
         </p>
     </div>
 

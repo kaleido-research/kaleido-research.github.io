@@ -37,6 +37,26 @@ $(window).on('load', function() {
 
         var model = document.getElementById('gt-3d');
         model.src = 'kaleido/gso3d/glbs/gt_compressed/' + label.toLowerCase() + '.glb'
+
+        // update the NeRF video based on the selected options
+        var nerf_label = $('#nerf-selector1').val()
+        var nerf_views = $('#nerf-selector2').val()
+
+        var video = document.getElementById('insngp-nerf');
+        video.src = 'kaleido/videos/multiview/nerf_synthetic/ingp/' + nerf_views.toLowerCase() + '_view/' + nerf_label + '.mp4'
+
+        var video = document.getElementById('3dgs-nerf');
+        video.src = 'kaleido/videos/multiview/nerf_synthetic/3dgs/' + nerf_views.toLowerCase() + '_view/' + nerf_label + '.mp4'
+
+        var video = document.getElementById('eschernet-nerf');
+        video.src = 'kaleido/videos/multiview/nerf_synthetic/eschernet/' + nerf_views.toLowerCase() + '_view/' + nerf_label + '.mp4'
+
+
+        var video = document.getElementById('kaleido-nerf');
+        video.src = 'kaleido/videos/multiview/nerf_synthetic/kaleido/' + nerf_views.toLowerCase() + '_view/' + nerf_label + '.mp4'
+
+        var video = document.getElementById('gt-nerf');
+        video.src = 'kaleido/videos/multiview/nerf_synthetic/gt/' + nerf_label + '.mp4'
     }
 
     // --- INITIALIZATION ---
@@ -50,6 +70,8 @@ $(window).on('load', function() {
     $('.adaptive-selector').on('change', function() {
         adjustWidth(this);
     });
+
+
 });
 
 

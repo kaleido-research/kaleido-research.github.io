@@ -1,9 +1,9 @@
 @import '../assets/stylesheets/master';
 
-.columns-8 {
+.columns-3 {
     display: grid;
     column-gap: 1vw;
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(3, 1fr);
 }
 
 .columns-4 {
@@ -11,6 +11,20 @@
     column-gap: 1vw;
     grid-template-columns: repeat(4, 1fr);
 }
+
+.columns-5 {
+    display: grid;
+    column-gap: 1vw;
+    grid-template-columns: repeat(5, 1fr);
+}
+
+
+.columns-2 {
+    display: grid;
+    column-gap: 2vw;
+    grid-template-columns: repeat(2, 1fr);
+}
+
 
 .media-wrapper {
     flex-grow: 1;
